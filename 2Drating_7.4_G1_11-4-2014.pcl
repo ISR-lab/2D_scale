@@ -1,0 +1,206 @@
+string filename = logfile.subject() + "_7.4_G1_ratings";
+output_file out = new output_file;
+out.open ( filename + ".txt" );
+
+mouse mse = response_manager.get_mouse(1);
+int resp_x = -280;
+int resp_y = -190;
+int boxwidth = 0; #width for the horizontal response box
+int boxheight = 0; # height for the vertical response box
+int boxhoriz_x = 1; #position of the horizontal box on the x axis
+int boxhoriz_y = 1; #position of the horizontal box on the y axis
+int boxvert_x = 1; #position of the vertical box on the x axis
+int boxvert_y = 1;#position of the vertical box on the y axis
+int resp_y_disp = 0;
+#int VAS_x = 0;
+#int VAS_y = 0;
+int start_time = 0;
+int VAS_time = 0;
+int start_x = -280;
+int start_y = -190;
+int vas_duration = 0;
+
+array<int> allrespx[0];
+array<int> allrespy[0];
+#array<int> allVASx[0];
+#array<int> allVASy[0];
+array<int> allVAStime[0];
+
+#output_port port = output_port_manager.get_port(1);
+
+
+############### VAS ################
+loop 
+	int i = 1;
+	nofatigue.rotate_90(270);
+	faintfatigue.rotate_90(270);
+	vweakfatigue.rotate_90(270);
+	weakfatigue.rotate_90(270);
+	vmildfatigue.rotate_90(270);
+	mildfatigue.rotate_90(270);
+	modfatigue.rotate_90(270);
+	bstrongfatigue.rotate_90(270);
+	sintensefatigue.rotate_90(270);
+	strongfatigue.rotate_90(270);
+	intensefatigue.rotate_90(270);
+	vintensefatigue.rotate_90(270);
+	eintensefatigue.rotate_90(270);
+until i > 2
+begin
+	tr_VAS.present();
+
+		loop 
+			int stop=response_manager.total_response_count(1);
+			mse.set_xy(start_x,start_y);
+			start_time = clock.time();
+#			if i == 1 then
+#				vas_duration = 300000;
+#			else
+#				vas_duration = 300000;
+#			end;
+			VAS.present()
+			
+		until clock.time() >= start_time + 300000#vas_duration
+			
+		begin
+			mse.poll();
+			resp_x = mse.x();
+			resp_y = mse.y();
+			resp_y_disp = mse.y()+3;
+	#		term.print( resp_x);
+	#		term.print( "\t");
+	#		term.print( mse.x());
+	#		term.print( "\n");
+	#		term.print( resp_y );
+	#		term.print( "\t");
+	#		term.print( mse.y());
+	#		term.print( "\n");
+			
+			if ( resp_x <= -280 ) then
+				boxwidth = 1;
+			else
+				boxwidth = 280 + resp_x;
+	#		elseif resp_x < 0 && resp_x > -260 then
+	#			boxwidth = 260 + resp_x + 20
+	#		elseif resp_x > 0 && resp_x < 260 then
+	#			boxwidth = 260 + resp_x
+			end;
+			if ( resp_y <= -186 ) then
+				boxheight = 1;
+			else
+				boxheight = 186 + resp_y_disp
+	#		elseif resp_y < 0 && resp_y > -260 then
+	#			boxheight = 260 + resp_y + 20
+	#		elseif resp_y > 0 && resp_y < 260 then
+	#			boxheight = 260 + resp_y
+			end;
+			boxhoriz_x = -280 + (boxwidth/2);
+			boxhoriz_y = resp_y_disp -3;
+			boxvert_x = resp_x -1;
+			boxvert_y = -190 + (boxheight/2);
+			VAS.set_part_x(5, resp_x );
+			VAS.set_part_y(5, resp_y_disp );
+			responseboxhoriz.set_width( boxwidth );
+			responseboxvert.set_height( boxheight );
+			VAS.set_part_x(6, boxvert_x);
+			VAS.set_part_y(6, boxvert_y);
+			VAS.set_part_x(7, boxhoriz_x);
+			VAS.set_part_y(7, boxhoriz_y);
+			VAS_time = clock.time() - start_time;
+			VAS.present();
+
+#		VAS_x = ((resp_x*2)/52) + ((280*2)/52);
+#		VAS_y = ((resp_y*2)/52) + ((190*2)/52);
+		allrespx.add( resp_x );
+		allrespy.add( resp_y );
+#		allVASx.add( VAS_x );
+#		allVASy.add( VAS_y );
+		allVAStime.add( VAS_time );	
+	#	term.print( VAS_x );
+	#	term.print( "\t");
+	#	term.print( VAS_y );
+	#	term.print( "\n" );
+		stimulus_data cross_pos = stimulus_manager.last_stimulus_data();
+		cross_pos.set_event_code( cross_pos.event_code() + "," + string( i )+ "," + string( resp_x )+ "_" + string( resp_y ) + "_" + string( VAS_time));
+
+		end;
+		
+start_x = resp_x;
+start_y = resp_y;
+	
+	if i == 1 then
+		tr_pmstart.present()
+	end;
+	
+i=i+1;
+
+end;
+
+tr_thanks.present();
+	
+#find the number of rating in the array
+int allrespx_nb = allrespx.count();
+
+out.print( "response on x axis (fatigue)" + "\t" + "response on y axis (ache)" + "\t" + "rating times" + "\n");
+loop 
+	int r = 1
+until
+	r > allrespx_nb
+begin
+	out.print( allrespx[r] );
+	out.print( "\t" );
+	out.print( allrespy[r] );
+	out.print( "\t" );
+#	out.print( allVASx[r] );
+#	out.print( "\t" );
+#	out.print( allVASy[r] );
+#	out.print( "\t" );
+	out.print( allVAStime[r] );
+	out.print( "\n" );
+	r = r + 1
+end;
+#out.print( "\n");
+#out.print( "response on y axis (ache)" + "\n");
+#loop 
+#	int r = 1
+#until
+#	r > allrespy_nb
+#begin
+#	out.print( allrespy[r] );
+#	out.print( "\t" );
+#	r = r + 1
+#end;
+#out.print( "\n");
+#out.print( "VAS value on x axis (fatigue)" + "\n");
+#loop 
+#	int r = 1
+#until
+#	r > allVASx_nb
+#begin
+#	out.print( allVASx[r] );
+#	out.print( "\t" );
+#	r = r + 1
+#end;
+#out.print( "\n");
+#out.print("VAS value on y axis (ache)" + "\n");
+#loop 
+#	int r = 1
+#until
+#	r > allVASy_nb
+#begin
+#	out.print( allVASy[r] );
+#	out.print( "\t" );
+#	r = r + 1
+#end;
+#out.print( "\n");
+#out.print( "rating times" + "\n");
+#loop 
+#	int r = 1
+#until
+#	r > alltime_nb
+#begin
+#	out.print( allVAStime[r] );
+#	out.print( "\t" );
+#	r = r + 1
+#end;
+out.close();
