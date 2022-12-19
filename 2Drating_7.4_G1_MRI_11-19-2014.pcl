@@ -1,0 +1,217 @@
+string filename = logfile.subject() + "_7.4_G1_MRI_ratings";
+output_file out = new output_file;
+out.open ( filename + ".txt" );
+
+mouse mse = response_manager.get_mouse(1);
+int resp_x = -280;
+int resp_y = -190;
+int boxwidth = 0; #width for the horizontal response box
+int boxheight = 0; # height for the vertical response box
+int boxhoriz_x = 1; #position of the horizontal box on the x axis
+int boxhoriz_y = 1; #position of the horizontal box on the y axis
+int boxvert_x = 1; #position of the vertical box on the x axis
+int boxvert_y = 1;#position of the vertical box on the y axis
+int resp_y_disp = 0;
+int start_time = 0;
+int begin_time = 0;
+int VAS_time = 0;
+int VAS_Ttime = 0;
+int start_x = -280;
+int start_y = -190;
+int vas_duration = 0;
+int x_cross = 0;
+int y_cross = 0;
+int cross_y_disp = 0;
+int Yboxwidth = 0; #width for the horizontal response box
+int Xboxheight = 0; # height for the vertical response box
+int Yboxhoriz_x = 1; #position of the horizontal box on the x axis
+int Yboxhoriz_y = 1; #position of the horizontal box on the y axis
+int Xboxvert_x = 1; #position of the vertical box on the x axis
+int Xboxvert_y = 1;#position of the vertical box on the y axis
+int t= 1;
+
+array<int> cross_x[58] = {-200,-200,-200,-200,-200,-200,-200,-200,-200,-200,-200,-200,-200,-200,-200,-200,-100,-100,-100,-100,-100,-100,-100,-100,-100,-100,-100,-100,-100,-100,-100,-100,-100,-100,-100,-100,-50,-50,-50,-50,-50,-50,-50,-50,-50,-50,-50,-50,-50,-50,-50,-50,-50,-50,-50,-50,-50,-50};
+array<int> cross_y[58] = {-180,-180,-180,-180,-180,-180,-180,-180,-180,-180,-180,-180,-180,-180,-180,-180,-180,-180,-180,-180,-180,-180,-140,-140,-140,-140,-140,-140,-140,-140,-140,-140,-140,-100,-100,-100,-100,-100,-100,-100,-100,-100,-100,-100,-80,-80,-80,-80,-80,-80,-80,-80,-80,-80,-80,-80,-80,-80};
+array<int> cross_xpm[58] = {-200,-200,-200,-200,-200,-200,-200,-200,-200,-200,-200,-200,-200,-200,-200,-200,-100,-100,-100,-100,-100,-100,-100,-100,-100,-100,-100,-100,-100,-100,-100,-100,-100,-100,-100,-100,-50,-50,-50,-50,-50,-50,-50,-50,-50,-50,-50,-50,-50,-50,-50,-50,-50,-50,-50,-50,-50,-50};
+array<int> cross_ypm[58] = {-180,-180,-180,-180,-180,-180,-180,-180,-180,-180,-180,-180,-180,-180,-180,-180,-180,-180,-180,-180,-180,-180,-140,-140,-140,-140,-140,-140,-140,-140,-140,-140,-140,-100,-100,-100,-100,-100,-100,-100,-100,-100,-100,-100,-80,-80,-80,-80,-80,-80,-80,-80,-80,-80,-80,-80,-80,-80};
+
+array<int> allrespx[0];
+array<int> allcrossx[0];
+array<int> allcrossy[0];
+array<int> allrespy[0];
+array<int> allVAStime[0];
+array<int> allVASTtime[0];
+
+tr_waittriggers.present();
+
+tr_cross.present();
+
+############### VAS ################
+loop 
+	int i = 1;
+	nofatigue.rotate_90(270);
+	faintfatigue.rotate_90(270);
+	vweakfatigue.rotate_90(270);
+	weakfatigue.rotate_90(270);
+	vmildfatigue.rotate_90(270);
+	mildfatigue.rotate_90(270);
+	modfatigue.rotate_90(270);
+	bstrongfatigue.rotate_90(270);
+	sintensefatigue.rotate_90(270);
+	strongfatigue.rotate_90(270);
+	intensefatigue.rotate_90(270);
+	vintensefatigue.rotate_90(270);
+	eintensefatigue.rotate_90(270);
+until i > 2
+begin
+	
+	tr_VAS.present();
+
+	loop 
+#		t = 1;
+		if i == 1 then
+			x_cross = cross_x[t];
+			y_cross = cross_y[t];
+			cross_y_disp = y_cross +3;
+		else
+			x_cross = cross_xpm[t];
+			y_cross = cross_ypm[t];
+			cross_y_disp = y_cross +3;
+		end;
+
+		if ( x_cross <= -280 ) then
+			boxwidth = 1;
+		else
+			boxwidth = 280 + x_cross;
+		end;
+		if ( y_cross <= -186 ) then
+			boxheight = 1;
+		else
+			boxheight = 186 + cross_y_disp
+		end;
+		boxhoriz_x = -280 + (boxwidth/2);
+		boxhoriz_y = cross_y_disp -3;
+		boxvert_x = x_cross -1;
+		boxvert_y = -190 + (boxheight/2);
+		VAS.set_part_x(5, x_cross );
+		VAS.set_part_y(5, cross_y_disp );
+		responseboxhoriz.set_width( boxwidth );
+		responseboxvert.set_height( boxheight );
+		VAS.set_part_x(6, boxvert_x);
+		VAS.set_part_y(6, boxvert_y);
+		VAS.set_part_x(7, boxhoriz_x);
+		VAS.set_part_y(7, boxhoriz_y);
+
+		mse.set_xy(start_x,start_y);
+		start_time = clock.time();
+		VAS.present();
+	until t > cross_x.count() || clock.time() >= start_time + 300000 #vas_duration
+		
+	begin
+		x_cross = cross_x[t];
+		y_cross = cross_y[t];
+		cross_y_disp = y_cross +3;
+		if ( x_cross <= -280 ) then
+			boxwidth = 1;
+		else
+			boxwidth = 280 + x_cross;
+		end;
+		if ( y_cross <= -186 ) then
+			boxheight = 1;
+		else
+			boxheight = 186 + cross_y_disp
+		end;
+		boxhoriz_x = -280 + (boxwidth/2);
+		boxhoriz_y = cross_y_disp -3;
+		boxvert_x = x_cross -1;
+		boxvert_y = -190 + (boxheight/2);
+		VAS.set_part_x(5, x_cross );
+		VAS.set_part_y(5, cross_y_disp );
+		responseboxhoriz.set_width( boxwidth );
+		responseboxvert.set_height( boxheight );
+		VAS.set_part_x(6, boxvert_x);
+		VAS.set_part_y(6, boxvert_y);
+		VAS.set_part_x(7, boxhoriz_x);
+		VAS.set_part_y(7, boxhoriz_y);
+
+		mse.poll();
+		resp_x = mse.x();
+		resp_y = mse.y();
+		resp_y_disp = mse.y()+3;
+
+		if ( resp_x <= -280 ) then
+			Yboxwidth = 1;
+		else
+			Yboxwidth = 280 + resp_x;
+		end;
+		if ( resp_y <= -186 ) then
+			Xboxheight = 1;
+		else
+			Xboxheight = 186 + resp_y_disp
+		end;
+		Yboxhoriz_x = -280 + (Yboxwidth/2);
+		Yboxhoriz_y = resp_y_disp;
+		Xboxvert_x = resp_x -1;
+		Xboxvert_y = -190 + (Xboxheight/2);
+		VAS.set_part_x(8, resp_x );
+		VAS.set_part_y(8, resp_y_disp );
+		Yresponsebox.set_width( Yboxwidth );
+		Xresponsebox.set_height( Xboxheight );
+		VAS.set_part_x(9, Xboxvert_x);
+		VAS.set_part_y(9, Xboxvert_y);
+		VAS.set_part_x(10, Yboxhoriz_x);
+		VAS.set_part_y(10, Yboxhoriz_y);
+
+	VAS_time = clock.time() - begin_time;
+	VAS_Ttime = clock.time() - start_time;
+	VAS.present();
+	t = t+1 ;
+	allrespx.add( resp_x );
+	allrespy.add( resp_y );
+	allcrossx.add( x_cross );
+	allcrossy.add(y_cross );
+	allVAStime.add( VAS_time );
+	allVASTtime.add( VAS_Ttime );
+	stimulus_data cross_pos = stimulus_manager.last_stimulus_data();
+	cross_pos.set_event_code( cross_pos.event_code() + "," + string( i )+ "," + string( resp_x )+ "_" + string( resp_y ) + "_" + string( x_cross )+ "_" + string( y_cross ) + "_" + string( VAS_time)+  "_" + string( VAS_Ttime));
+
+	end;
+		
+start_x = resp_x;
+start_y = resp_y;
+	
+	if i == 1 then
+		tr_pmstart.present();
+		t = 1;
+	end;
+	
+i=i+1;
+
+end;
+
+tr_thanks.present();
+	
+#find the number of rating in the array
+int allrespx_nb = allrespx.count();
+
+out.print( "response on x axis (fatigue)" + "\t" + "response on y axis (ache)" + "\t" +"previous rating on x axis (fatigue)" + "\t" + "previous rating on y axis (ache)" + "\t" + "rating times" + "\t" + "rating times per trial" + "\n");
+loop 
+	int r = 1
+until
+	r > allrespx_nb
+begin
+	out.print( allrespx[r] );
+	out.print( "\t" );
+	out.print( allrespy[r] );
+	out.print( "\t" );
+	out.print( allcrossx[r] );
+	out.print( "\t" );
+	out.print( allcrossy[r] );
+	out.print( "\t" );
+	out.print( allVAStime[r] );
+	out.print( "\t" );
+	out.print( allVASTtime[r] );
+	out.print( "\n" );
+	r = r + 1
+end;
+out.close();
